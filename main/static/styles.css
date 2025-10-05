@@ -1,0 +1,17 @@
+.category-link {
+    padding: 8px 0;
+    text-decoration: none; 
+    transition: color 0.8s;
+    color: #333;
+}
+
+.category-link:hover {
+    color: #007bff;
+}
+
+.sidebar {
+    background-color: #f8f9fa;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    min-height: 100vh;
+}
