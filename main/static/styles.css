@@ -9,15 +9,25 @@
     color: #007bff;
 }
 
+
 .sidebar {
     background-color: #f8f9fa;
     box-shadow: 2px 0 5px rgba(0,0,0,0.1);
     padding: 20px;
-    min-height: 100vh;
+    min-height: 50vh;
+    border-radius: 13px;
 }
 
 
 .product-card {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     border: 10px solid black;
+}
+
+
+.sticky-sidebar {
+    position: -webkit-sticky; /* Для поддержки в Safari */
+    position: sticky;
+    top: 10px; /* Расстояние от верха, когда панель должна "прилипнуть" */
+    align-self: flex-start; /* Помогает корректно работать в flex-контейнере */
 }
