@@ -2,7 +2,7 @@
     padding: 8px 0;
     text-decoration: none; 
     transition: color 0.8s;
-    color: #333;
+    color: antiquewhite;
 }
 
 .category-link:hover {
@@ -11,22 +11,22 @@
 
 
 .sidebar {
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    padding: 20px;
-    min-height: 50vh;
-    margin: 10px;
-    border-radius: 13px;
-    position: -webkit-sticky; /* Для поддержки в Safari */
-    position: sticky;
-    top: 0; /* Расстояние от верха, когда панель должна "прилипнуть" */
-    align-self: flex-start; /* Помогает корректно работать в flex-контейнере */
+    position: fixed;
+    height: 100vh;
 }
 
+
+.header {
+    color: wheat;
+    display: flex;
+}
+
+
+.pos {
+    position: relative;
+}
 
 
 .product-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    border: 10px solid black;
+    display: flex;
 }
-
-

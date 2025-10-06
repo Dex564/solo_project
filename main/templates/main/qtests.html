@@ -13,23 +13,13 @@
     </head>
 
     <body>
-        
-        
-        <div class="row">
-            <nav id="nav" class="nav flex-column bg-dark col-md-3 col-lg-2 sidebar">
-                <ul class="nav-list">
-                    <ul>
-                        <li><a class="category-link " href="{% url "main:main_page" %}">Home</a></li>
-                        <li><a class="category-link" href="{% url "main:products_list" %}">Product list</a></li>
-                    </ul>
-                </ul>
-            </nav>
-
-            <div class="col-md-9 col-lg-10">
-                {% block content %}{% endblock content %}
-            </div>
-
+        <div class="card" style="width: 18rem;">
+        <img class="card-img-top" src="..." alt="Card image cap">
+        <div class="card-body">
+            <h5 class="card-title">Card title</h5>
+            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+            <a href="#" class="btn btn-primary">Go somewhere</a>
         </div>
-
+    </div>
     </body>
 </html>
