@@ -1,12 +1,13 @@
 {% extends "main/base.html" %}
 
 {% block title %}Все товары{% endblock title %}
+
 {% block content %}
 
     {% for product in products %}
 
     
-    <div class="col-xl-3 col-lg-4 col-md-6">
+    <div class="col-xl-3 col-lg-4 col-md-6 row">
         <div class="card product-card h-100">
             <img src="{{ product.main_image.url }}" 
                 class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">

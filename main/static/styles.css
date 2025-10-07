@@ -13,6 +13,7 @@
 .sidebar {
     position: fixed;
     height: 100vh;
+    width: 150px;
 }
 
 
@@ -30,4 +31,9 @@
 
 .product-card {
     display: flex;
+}
+
+
+.blk-content {
+    margin-left: 370px;
 }
