@@ -1,2 +1,21 @@
 {% extends "main/base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-5">
+            <img class="cart-img-top product-card" src="{{product.main_image.url}}" alt="{{product.name}}">
+        </div>
 
+        <div class="col-md-7">
+            <h3> {{product.name}} </h3>
+            <h4>{{product.price}} ₽</h4>
+            {% if product.available %}
+            <h4>available</h4>
+            {% else %}
+            <h4>no</h4>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock content %}
