@@ -1,3 +1,5 @@
+/* Cтили для product_details.html */
+
 .category-link {
     padding: 8px 0;
     text-decoration: none; 
@@ -41,6 +43,15 @@
 .blk-content {
     margin-left: 180px;
 }
+
+/* Конец стилей для product_details.html */
+
+
+/* Дополнительные стили для products_list.html */
+.decoration-none {
+    text-decoration: none;
+}
+/* Конец дополнительных стилией для products_list.html */
 
 
 
