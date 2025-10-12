@@ -7,7 +7,7 @@ def main_page(request):
     return render(request, 'main/base.html')
 
 def products_list(request):
-    products = Product.objects.filter(available=True)
+    products = Product.objects.filter()
 
     return render(request, 'main/products_list.html',
                 {
