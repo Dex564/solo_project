@@ -386,23 +386,110 @@
         
         addToCartButtons.forEach(button => {
             button.addEventListener('click', function(e) {
-                ///e.preventDefault(); // ← ЭТО БЛОКИРУЕТ ОТПРАВКУ ФОРМЫ!
+                e.preventDefault();
+                e.stopPropagation(); // Добавляем эту строку!
+                
+                const form = this.closest('form');
+                const url = form.action;
+                const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
                 
                 // Анимация клика
                 this.style.transform = 'scale(0.95)';
-                
-                // Временная смена текста
                 const originalText = this.innerHTML;
-                this.innerHTML = '<i class="bi bi-check2 me-2"></i>Добавлено!';
-                this.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                const originalBackground = this.style.background;
                 
-                setTimeout(() => {
-                    this.innerHTML = originalText;
-                    this.style.transform = '';
-                    this.style.background = '';
-                }, 2000);
+                // Отправка AJAX запроса
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrfToken,
+                    },
+                    body: new FormData(form)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Успешное добавление
+                        this.innerHTML = '<i class="bi bi-check2 me-2"></i>Добавлено!';
+                        this.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                        
+                        // Обновляем счетчик корзины в шапке сайта
+                        updateCartCounter(data.cart_total_items);
+                        
+                        // Показываем уведомление
+                        showNotification(data.message, 'success');
+                    } else {
+                        throw new Error('Server returned error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    this.innerHTML = '<i class="bi bi-x-circle me-2"></i>Ошибка!';
+                    this.style.background = 'linear-gradient(135deg, #dc3545 0%, #c82333 100%)';
+                    
+                    // Если AJAX не работает, отправляем форму обычным способом
+                    setTimeout(() => {
+                        form.submit();
+                    }, 1500);
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        this.innerHTML = originalText;
+                        this.style.transform = '';
+                        this.style.background = originalBackground;
+                    }, 2000);
+                });
             });
         });
+        
+        function updateCartCounter(totalItems) {
+            // Обновляем счетчик в шапке сайта
+            const cartCounter = document.querySelector('.cart-counter, .cart-count, #cart-count');
+            if (cartCounter) {
+                cartCounter.textContent = totalItems;
+                // Анимация обновления счетчика
+                cartCounter.style.transform = 'scale(1.3)';
+                setTimeout(() => {
+                    cartCounter.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }
+        
+        function showNotification(message, type = 'success') {
+            // Удаляем предыдущие уведомления
+            const existingNotifications = document.querySelectorAll('.custom-notification');
+            existingNotifications.forEach(notification => notification.remove());
+            
+            // Создаем красивое уведомление
+            const notification = document.createElement('div');
+            notification.className = `custom-notification alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            `;
+            notification.innerHTML = `
+                <strong>${type === 'success' ? '✓' : '✗'}</strong> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Автоматически скрываем через 3 секунды
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
         
         // Анимация при скролле
         const observerOptions = {
