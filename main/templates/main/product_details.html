@@ -1,208 +1,736 @@
 {% extends "main/base.html" %}
+{% load static %}
+
+{% block title %}{{ product.name }}{% endblock title %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <!-- Левая колонка с изображением -->
-        <div class="col-md-6">
-            <div class="product-image-container">
-                <img class="img-fluid rounded product-image" src="{{ product.main_image.url }}" alt="{{ product.name }}">
-            </div>
+<div class="container-fluid px-3">
+    <!-- Заголовок с анимацией -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-6 fw-bold text-dark mb-2 animate-fade-in">
+                <i class="bi bi-tag text-danger me-2"></i>
+                {{ product.name }}
+            </h1>
+            <p class="text-muted animate-slide-up">Product Details</p>
         </div>
+    </div>
 
-        <!-- Правая колонка с информацией о товаре -->
-        <div class="col-md-6">
-            <h1 class="product-title">{{ product.name }}</h1>
-            
-            <div class="rating-section mb-2">
-                <span class="badge bg-warning text-dark">
-                    <i class="bi bi-star-fill"></i> 4.8 (1247 reviews)
-                </span>
-            </div>
-
-            <div class="price-section mb-3">
-                <span class="current-price"> {{product.price}} $</span>
-                <span class="original-price text-muted text-decoration-line-through">{{product.price}} $</span>
-            </div>
-
-            <div class="availability mb-3">
-                {% if product.available == True %}
-                    <span class="badge bg-success">
-                        <i class="bi bi-check-circle"></i> In Stock
-                    </span>
-                {% else %}
-                <span class="badge bg-danger">
-                    <i class="bi bi-x-circle"></i> Out of Stock
-                </span>
-                {% endif %}
-            </div>
-
-            <p class="product-description">
-                {{product.description}}
-            </p>
-
-            <hr>
-
-            <!-- Количество и кнопки -->
-            <div class="quantity-section mb-4">
-                <label class="form-label"><strong>Quantity:</strong></label>
-                <div class="d-flex gap-3 align-items-center">
-                    <div class="quantity-selector">
-                        {% if product.available %}
-                        <input type="number" 
-                                class="form-control" 
-                                id="quantity-input"
-                                name="quantity" 
-                                value="1" 
-                                min="1" 
-                                max="100"
-                                style="width: 100px;">
-                        {% else %}
-                        <div class="input-group" style="width: 130px;">
-                            <input type="number" 
-                                    class="form-control text-center" 
-                                    value="0" 
-                                    disabled
-                                    style="background-color: #f8f9fa;">
-                            <span class="input-group-text bg-light">max</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% if product.available %}
-                    <div class="action-buttons d-flex gap-2">
-                        <form action="{% url 'cart:cart_add' product.id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-cart-plus"></i> Добавить в корзину
+    <div class="row">
+        <!-- Изображения товара -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm animate-card">
+                <div class="card-body p-4">
+                    <!-- Главное изображение с навигацией и счетчиком -->
+                    <div class="product-gallery position-relative mb-4">
+                        <div class="text-center position-relative">
+                            <img id="main-image" src="{{ product.main_image.url }}" alt="{{ product.name }}" 
+                                 class="img-fluid rounded-3 main-product-image" style="max-height: 450px; object-fit: contain;">
+                            
+                            <!-- Счетчик изображений -->
+                            {% if product.images.all %}
+                            <div class="image-counter position-absolute top-0 end-0 m-3">
+                                <span class="badge bg-dark bg-opacity-75 text-white px-3 py-2">
+                                    <span id="current-image">1</span> / <span id="total-images">{{ product.images.all|length|add:1 }}</span>
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Кнопки навигации -->
+                            {% if product.images.all %}
+                            <button class="btn btn-nav btn-prev position-absolute top-50 start-0 translate-middle-y">
+                                <i class="bi bi-chevron-left fs-4"></i>
                             </button>
-                        </form>
-                        <button class="btn btn-success btn-lg buy-now-btn">
-                            <i class="bi bi-lightning"></i> Buy Now
-                        </button>
+                            <button class="btn btn-nav btn-next position-absolute top-50 end-0 translate-middle-y">
+                                <i class="bi bi-chevron-right fs-4"></i>
+                            </button>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% else %}
-                    <button class="btn btn-outline-primary btn-lg flex-fill" disabled>
-                        <i class="bi bi-cart-x"></i> Unavailable
-                    </button>
+                    
+                    <!-- Улучшенная галерея миниатюр -->
+                    {% if product.images.all %}
+                    <div class="thumbnails-container mt-4">
+                        <h6 class="fw-bold text-dark mb-3">
+                            <i class="bi bi-images me-2"></i>Gallery
+                        </h6>
+                        <div class="thumbnails-scroller">
+                            <div class="thumbnails-track d-flex gap-3" id="thumbnails-track">
+                                <!-- Главное изображение как первая миниатюра -->
+                                <div class="thumbnail-item flex-shrink-0">
+                                    <div class="thumbnail-wrapper position-relative">
+                                        <img src="{{ product.main_image.url }}" alt="{{ product.name }}" 
+                                             class="img-fluid rounded-2 cursor-pointer image-thumbnail active"
+                                             style="height: 80px; width: auto; object-fit: cover;"
+                                             data-image-src="{{ product.main_image.url }}"
+                                             data-image-index="0">
+                                        <div class="thumbnail-overlay"></div>
+                                    </div>
+                                </div>
+                                <!-- Дополнительные изображения -->
+                                {% for image in product.images.all %}
+                                <div class="thumbnail-item flex-shrink-0">
+                                    <div class="thumbnail-wrapper position-relative">
+                                        <img src="{{ image.image.url }}" alt="{{ product.name }} - image {{ forloop.counter }}" 
+                                             class="img-fluid rounded-2 cursor-pointer image-thumbnail"
+                                             style="height: 80px; width: auto; object-fit: cover;"
+                                             data-image-src="{{ image.image.url }}"
+                                             data-image-index="{{ forloop.counter|add:1 }}">
+                                        <div class="thumbnail-overlay"></div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
             </div>
+        </div>
 
-            <hr>
-
-            <!-- Ключевые особенности -->
-            <div class="key-features mb-4">
-                <h5 class="mb-3">Key Features</h5>
-                <div class="row">
-                    <div class="col-6">
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-check-circle text-success"></i> Key Feature</li>
-                            <li><i class="bi bi-check-circle text-success"></i> Key Feature</li>
-                            <li><i class="bi bi-check-circle text-success"></i> Key Feature</li>
-                        </ul>
+        <!-- Информация о товаре -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm animate-card">
+                <div class="card-body p-4">
+                    <!-- Название и категория -->
+                    <h2 class="h1 fw-bold text-dark mb-3">{{ product.name }}</h2>
+                    {% if product.category %}
+                    <div class="mb-4">
+                        <span class="badge bg-dark bg-opacity-10 text-dark px-3 py-2 fs-6">
+                            <i class="bi bi-tags me-1"></i>{{ product.category }}
+                        </span>
                     </div>
-                    <div class="col-6">
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-check-circle text-success"></i> Key Feature</li>
-                            <li><i class="bi bi-check-circle text-success"></i> Key Feature</li>
-                            <li><i class="bi bi-check-circle text-success"></i> Key Feature</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+                    {% endif %}
 
-            <!-- Дополнительные преимущества -->
-            <div class="benefits-section">
-                <div class="row text-center">
-                    <div class="col-md-4 mb-3">
-                        <div class="benefit-item">
-                            <i class="bi bi-truck fs-4 text-primary"></i>
-                            <h6 class="mt-2">Free Shipping</h6>
-                            <small class="text-muted">On orders over $50</small>
+                    <!-- Цена с акцентом -->
+                    <div class="mb-4">
+                        <span class="h1 text-danger fw-bold price-display">{{ product.price }} $</span>
+                        {% if product.price > 1000 %}
+                        <div class="mt-1">
+                            <span class="badge bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-truck me-1"></i>Free Shipping
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Описание -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark mb-3">
+                            <i class="bi bi-card-text me-2"></i>Description
+                        </h5>
+                        <p class="text-muted fs-6 lh-base">{{ product.description|linebreaksbr }}</p>
+                    </div>
+
+                    <!-- Дополнительная информация в карточках -->
+                    <div class="mb-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-light">
+                                    <div class="d-flex align-items-center">
+                                        <div class="info-icon me-3">
+                                            <i class="bi bi-check2-circle text-success fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">Availability</div>
+                                            <div class="text-muted small">{{ product.available|yesno:"In Stock,Out of Stock" }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card p-3 rounded-3 bg-light">
+                                    <div class="d-flex align-items-center">
+                                        <div class="info-icon me-3">
+                                            <i class="bi bi-calendar-check text-primary fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">Last Updated</div>
+                                            <div class="text-muted small">{{ product.updated|date:"d M Y" }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="benefit-item">
-                            <i class="bi bi-shield-check fs-4 text-primary"></i>
-                            <h6 class="mt-2">2 Year Warranty</h6>
-                            <small class="text-muted">Full coverage</small>
+
+                    <!-- Форма добавления в корзину с улучшенным UX -->
+                    <form action="{% url 'cart:cart_add' product.id %}" method="post" class="mb-4">
+                        {% csrf_token %}
+                        <div class="add-to-cart-section p-4 rounded-3 bg-light">
+                            <h6 class="fw-bold text-dark mb-3">
+                                <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                            </h6>
+                            <div class="row align-items-center g-3">
+                                <div class="col-auto">
+                                    <label for="quantity" class="form-label fw-bold mb-0">Quantity:</label>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="quantity-selector d-flex align-items-center">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" data-action="decrease">
+                                            <i class="bi bi-dash"></i>
+                                        </button>
+                                        <input type="number" id="quantity" name="quantity" value="1" min="1" max="100" 
+                                               class="form-control text-center mx-2" style="width: 70px;">
+                                        <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" data-action="increase">
+                                            <i class="bi bi-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-add-cart btn-lg py-3 px-4">
+                                        <i class="bi bi-cart-plus me-2"></i>
+                                        Add to Cart
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="benefit-item">
-                            <i class="bi bi-arrow-left-right fs-4 text-primary"></i>
-                            <h6 class="mt-2">30-Day Returns</h6>
-                            <small class="text-muted">No questions asked</small>
-                        </div>
+                    </form>
+
+                    <!-- Кнопки действий -->
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="{% url 'main:products_list' %}" class="btn btn-outline-dark py-3 flex-fill">
+                            <i class="bi bi-arrow-left me-2"></i>
+                            Back to Products
+                        </a>
+                        <a href="{% url 'cart:cart_detail' %}" class="btn btn-primary py-3 flex-fill">
+                            <i class="bi bi-cart me-2"></i>
+                            View Cart
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Похожие товары -->
+    {% if product.category %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="fw-bold text-dark mb-4">
+                <i class="bi bi-grid-3x3-gap text-danger me-2"></i>Related Products
+            </h3>
+            <div class="row g-4">
+                {% for related_product in product.category.product_set.all|slice:":3" %}
+                {% if related_product.id != product.id %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card product-card border-0 shadow-sm h-100">
+                        <div class="card-img-wrapper position-relative overflow-hidden rounded-top-3">
+                            <img class="card-img-top product-image" src="{{ related_product.main_image.url }}" 
+                                 alt="{{ related_product.name }}" style="height: 200px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge category-badge bg-dark bg-opacity-85 px-2 py-1">
+                                    {{ related_product.category }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column p-4">
+                            <a class="text-decoration-none" href="{{ related_product.get_absolute_url }}">
+                                <h6 class="card-title product-title fw-bold text-dark mb-2">
+                                    {{ related_product.name }}
+                                </h6>
+                            </a>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h5 mb-0 text-danger fw-bold">{{ related_product.price }} $</span>
+                                </div>
+                                <a href="{{ related_product.get_absolute_url }}" class="btn btn-outline-primary w-100 py-2">
+                                    <i class="bi bi-eye me-1"></i>View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <style>
-.product-image {
-    max-height: 500px;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
-.product-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
-
-.current-price {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: #dc3545;
-}
-
-.original-price {
-    font-size: 1.2rem;
-    margin-left: 10px;
-}
-
-.product-description {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    color: #666;
-}
-
-.quantity-section {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-}
-
-.benefit-item {
-    padding: 15px;
-    border-radius: 8px;
-    transition: transform 0.2s;
-}
-
-.benefit-item:hover {
-    transform: translateY(-2px);
-    background-color: #f8f9fa;
-}
-
-.action-buttons .btn {
-    flex: 1;
-}
-
-@media (max-width: 768px) {
-    .blk-content {
-        margin-left: 0;
+    /* Анимации */
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out;
     }
     
-    .action-buttons {
-        flex-direction: column;
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
     }
     
-    .action-buttons .btn {
+    .animate-card {
+        animation: cardAppear 0.5s ease-out;
+    }
+    
+    @keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Карточка */
+    .card {
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    /* Галерея */
+    .product-gallery {
+        position: relative;
+    }
+    
+    .main-product-image {
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        padding: 10px;
+    }
+
+    /* Кнопки навигации */
+    .btn-nav {
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        z-index: 10;
+        color: #333;
+    }
+    
+    .btn-nav:hover {
+        background: white;
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        color: var(--primary-color);
+    }
+
+    /* Улучшенные миниатюры */
+    .thumbnails-container {
+        margin-top: 2rem;
+    }
+    
+    .thumbnails-scroller {
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+    
+    .thumbnails-track {
+        min-width: min-content;
+    }
+    
+    .thumbnail-item {
+        transition: all 0.3s ease;
+    }
+    
+    .thumbnail-wrapper {
+        position: relative;
+        cursor: pointer;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .image-thumbnail {
+        transition: all 0.3s ease;
+        display: block;
+    }
+    
+    .image-thumbnail.active {
+        border-color: var(--primary-color);
+    }
+    
+    .thumbnail-wrapper:hover {
+        transform: translateY(-2px);
+        border-color: var(--primary-color);
+    }
+    
+    .thumbnail-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(220, 53, 69, 0.1);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
+    
+    .image-thumbnail.active + .thumbnail-overlay,
+    .thumbnail-wrapper:hover .thumbnail-overlay {
+        opacity: 1;
+    }
+
+    /* Счетчик изображений */
+    .image-counter .badge {
+        backdrop-filter: blur(10px);
+        font-weight: 600;
+    }
+
+    /* Секция добавления в корзину */
+    .add-to-cart-section {
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .add-to-cart-section:hover {
+        border-color: var(--primary-color);
+        background: rgba(220, 53, 69, 0.02);
+    }
+
+    /* Селектор количества */
+    .quantity-selector {
+        background: white;
+        border-radius: 12px;
+        padding: 5px;
+        border: 2px solid #e9ecef;
+    }
+    
+    .quantity-btn {
+        border: none;
+        border-radius: 8px;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .quantity-btn:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* Карточки информации */
+    .info-card {
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    
+    .info-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+    
+    .info-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Кнопка добавления в корзину */
+    .btn-add-cart {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #c82333 100%);
+        border: none;
+        color: white;
+        font-weight: 700;
+        border-radius: 14px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-add-cart::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
         width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.6s ease;
     }
-}
+    
+    .btn-add-cart:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(220, 53, 69, 0.6);
+        color: white;
+    }
+    
+    .btn-add-cart:hover::before {
+        left: 100%;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 0 15px;
+        }
+        
+        .blk-content {
+            padding: 1rem;
+        }
+        
+        h1.display-6 {
+            font-size: 1.8rem;
+        }
+        
+        .btn-add-cart {
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .row.align-items-center {
+            justify-content: center;
+        }
+        
+        .d-md-flex {
+            flex-direction: column;
+        }
+        
+        .flex-fill {
+            margin-bottom: 1rem;
+        }
+        
+        .btn-nav {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .btn-prev {
+            left: 10px !important;
+        }
+        
+        .btn-next {
+            right: 10px !important;
+        }
+        
+        .thumbnails-track {
+            gap: 8px;
+        }
+        
+        .image-thumbnail {
+            height: 70px !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .main-product-image {
+            max-height: 350px !important;
+        }
+        
+        .card-body {
+            padding: 1.5rem !important;
+        }
+        
+        .thumbnails-container {
+            margin-top: 1.5rem;
+        }
+        
+        .add-to-cart-section {
+            padding: 1.5rem !important;
+        }
+    }
+
+    /* Кастомный скролл для миниатюр */
+    .thumbnails-scroller::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .thumbnails-scroller::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .thumbnails-scroller::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+    }
+    
+    .thumbnails-scroller::-webkit-scrollbar-thumb:hover {
+        background: #c82333;
+    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Анимация при загрузке страницы
+        const cards = document.querySelectorAll('.animate-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Инициализация улучшенной галереи
+        initEnhancedGallery();
+        
+        // Инициализация селектора количества
+        initQuantitySelector();
+        
+        function initEnhancedGallery() {
+            const mainImage = document.getElementById('main-image');
+            const thumbnails = document.querySelectorAll('.image-thumbnail');
+            const prevBtn = document.querySelector('.btn-prev');
+            const nextBtn = document.querySelector('.btn-next');
+            const currentImageSpan = document.getElementById('current-image');
+            const totalImagesSpan = document.getElementById('total-images');
+            
+            let currentIndex = 0;
+            
+            // Создаем массив всех изображений
+            const allImages = Array.from(thumbnails).map(thumb => ({
+                src: thumb.getAttribute('data-image-src'),
+                index: parseInt(thumb.getAttribute('data-image-index'))
+            }));
+            
+            // Функция для обновления активной миниатюры
+            function updateActiveThumbnail(index) {
+                thumbnails.forEach((thumb, i) => {
+                    if (parseInt(thumb.getAttribute('data-image-index')) === index) {
+                        thumb.classList.add('active');
+                        thumb.parentElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'nearest',
+                            inline: 'center'
+                        });
+                    } else {
+                        thumb.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Функция для смены главного изображения
+            function changeMainImage(index) {
+                if (index >= 0 && index < allImages.length) {
+                    // Плавное исчезновение
+                    mainImage.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        mainImage.src = allImages[index].src;
+                        currentIndex = index;
+                        updateActiveThumbnail(index);
+                        
+                        // Обновляем счетчик
+                        if (currentImageSpan) {
+                            currentImageSpan.textContent = index + 1;
+                        }
+                        
+                        // Плавное появление
+                        mainImage.style.opacity = '1';
+                    }, 200);
+                }
+            }
+            
+            // Обработчики для миниатюр
+            thumbnails.forEach((thumb) => {
+                thumb.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-image-index'));
+                    changeMainImage(index);
+                });
+            });
+            
+            // Обработчики для кнопок навигации
+            if (prevBtn && nextBtn) {
+                prevBtn.addEventListener('click', function() {
+                    let newIndex = currentIndex - 1;
+                    if (newIndex < 0) newIndex = allImages.length - 1;
+                    changeMainImage(newIndex);
+                });
+                
+                nextBtn.addEventListener('click', function() {
+                    let newIndex = currentIndex + 1;
+                    if (newIndex >= allImages.length) newIndex = 0;
+                    changeMainImage(newIndex);
+                });
+            }
+            
+            // Обработка клавиш клавиатуры
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft') {
+                    let newIndex = currentIndex - 1;
+                    if (newIndex < 0) newIndex = allImages.length - 1;
+                    changeMainImage(newIndex);
+                } else if (e.key === 'ArrowRight') {
+                    let newIndex = currentIndex + 1;
+                    if (newIndex >= allImages.length) newIndex = 0;
+                    changeMainImage(newIndex);
+                }
+            });
+            
+            // Инициализация
+            if (totalImagesSpan) {
+                totalImagesSpan.textContent = allImages.length;
+            }
+            updateActiveThumbnail(0);
+        }
+        
+        function initQuantitySelector() {
+            const quantityInput = document.getElementById('quantity');
+            const quantityBtns = document.querySelectorAll('.quantity-btn');
+            
+            quantityBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    let value = parseInt(quantityInput.value);
+                    
+                    if (action === 'increase') {
+                        value = Math.min(value + 1, 100);
+                    } else if (action === 'decrease') {
+                        value = Math.max(value - 1, 1);
+                    }
+                    
+                    quantityInput.value = value;
+                    
+                    // Анимация изменения
+                    quantityInput.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        quantityInput.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+            
+            // Валидация ввода
+            if (quantityInput) {
+                quantityInput.addEventListener('change', function() {
+                    let value = parseInt(this.value);
+                    if (isNaN(value) || value < 1) this.value = 1;
+                    if (value > 100) this.value = 100;
+                });
+            }
+        }
+        
+        // Обработка добавления в корзину
+        const addToCartBtn = document.querySelector('.btn-add-cart');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function(e) {
+                // Анимация клика
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        }
+    });
+</script>
 {% endblock content %}

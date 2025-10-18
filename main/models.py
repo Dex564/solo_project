@@ -23,7 +23,6 @@ class Product(models.Model):
     name = models.CharField(max_length=50, db_index=True)
     slug = models.SlugField(max_length=100, unique=True)
     main_image = models.ImageField(upload_to='products/main')
-    
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     available = models.BooleanField(default=True)
@@ -42,4 +41,9 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse("main:product_detail", args=[self.id, self.slug])
     
+
+    
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='products/extra/')
 
