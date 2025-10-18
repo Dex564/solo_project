@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Devil Shop{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .main-content {
+            margin-left: 25%;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .category-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .category-item {
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .category-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .category-item a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+        
+        .product-card {
+            margin-bottom: 20px;
+            transition: transform 0.2s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 100;
+                width: 250px;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Верхнее меню -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'main:main_page' %}">Devil Shop</a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Поиск по продуктам -->
+                <form class="d-flex ms-auto" method="GET" action="{% url 'main:products_list' %}">
+                    <input class="form-control me-2" type="search" name="search" placeholder="Поиск по имени продукта" 
+                        aria-label="Search" value="{{ request.GET.search }}">
+                    <button class="btn btn-outline-light" type="submit">Найти</button>
+                </form>
+                
+                <!-- Мобильное меню для боковой панели -->
+                <button class="btn btn-outline-light ms-2 d-lg-none" id="sidebarToggle">
+                    Категории
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Боковая панель навигации -->
+            <div class="col-lg-3 col-md-4 sidebar bg-light" id="sidebar">
+                <h4>Категории товаров</h4>
+                <ul class="category-list mt-4">
+                    <li class="category-item"><a href="#">Все товары</a></li>
+                    <li class="category-item"><a href="#">Электроника</a></li>
+                    <li class="category-item"><a href="#">Одежда</a></li>
+                    <li class="category-item"><a href="#">Книги</a></li>
+                    <li class="category-item"><a href="#">Дом и сад</a></li>
+                    <li class="category-item"><a href="#">Спорт</a></li>
+                    <li class="category-item"><a href="#">Красота</a></li>
+                    <li class="category-item"><a href="#">Игрушки</a></li>
+                </ul>
+                
+                <div class="mt-5">
+                    <h5>Фильтры</h5>
+                    <form method="GET" action="{% url 'products_list' %}">
+                        <div class="mb-3">
+                            <label for="price_min" class="form-label">Цена от</label>
+                            <input type="number" class="form-control" id="price_min" name="price_min" 
+                                value="{{ request.GET.price_min }}" placeholder="0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="price_max" class="form-label">Цена до</label>
+                            <input type="number" class="form-control" id="price_max" name="price_max" 
+                                value="{{ request.GET.price_max }}" placeholder="10000">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm">Применить</button>
+                        <a href="{% url 'products_list' %}" class="btn btn-secondary btn-sm">Сбросить</a>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Основной контент -->
+            <div class="col-lg-9 col-md-8 main-content" id="mainContent">
+                {% block content %}
+                <!-- Содержимое будет в дочерних шаблонах -->
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Оверлей для мобильных устройств -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Управление боковой панелью на мобильных устройствах
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const mainContent = document.getElementById('mainContent');
+            
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    sidebarOverlay.classList.toggle('active');
+                });
+            }
+            
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                });
+            }
+            
+            // Фиксированное поведение боковой панели при скролле
+            window.addEventListener('scroll', function() {
+                const sidebarElement = document.getElementById('sidebar');
+                if (window.innerWidth >= 768) {
+                    if (sidebarElement) {
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        if (scrollTop > 100) {
+                            sidebarElement.style.paddingTop = '70px';
+                        } else {
+                            sidebarElement.style.paddingTop = '20px';
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_scripts %}
+    <!-- Дополнительные скрипты для дочерних шаблонов -->
+    {% endblock %}
+</body>
+</html>
