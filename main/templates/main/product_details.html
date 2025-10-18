@@ -69,9 +69,11 @@
                     </div>
                     {% if product.available %}
                     <div class="action-buttons d-flex gap-2">
-                        <button class="btn btn-primary btn-lg add-to-cart-btn">
-                            <i class="bi bi-cart-plus"></i> Add to Cart
-                        </button>
+                        <form action="{% url "cart:cart_add" product.id%}" method = "post">
+                            {{cart_product_form}}
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-lg">Добавить в корзину</button>
+                        </form>
                         <button class="btn btn-success btn-lg buy-now-btn">
                             <i class="bi bi-lightning"></i> Buy Now
                         </button>
