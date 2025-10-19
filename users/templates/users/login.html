@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-form">
+    <h2>Вход в аккаунт</h2>
+    
+    <form method="post">
+        {% csrf_token %}  <!-- Защита от CSRF атак - ОБЯЗАТЕЛЬНО -->
+        
+        <!-- Выводим поля формы -->
+        <div class="form-group">
+            <label for="{{ form.username.id_for_label }}">Email:</label>
+            {{ form.username }}  <!-- Поле для email (Django называет его username) -->
+            {% if form.username.errors %}
+                <div class="error">{{ form.username.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.password.id_for_label }}">Пароль:</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+                <div class="error">{{ form.password.errors }}</div>
+            {% endif %}
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Войти</button>
+    </form>
+    
+    <p>Нет аккаунта? <a href="{% url 'users:signup' %}">Зарегистрируйтесь</a></p>
+</div>
+{% endblock %}
