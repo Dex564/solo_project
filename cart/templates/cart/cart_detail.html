@@ -361,16 +361,6 @@
             });
         });
         
-        // Подтверждение удаления товара
-        const deleteButtons = document.querySelectorAll('.btn-outline-danger');
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function(e) {
-                if (!confirm('Are you sure you want to remove this item from your cart?')) {
-                    e.preventDefault();
-                }
-            });
-        });
-        
         // Анимация для кнопки checkout
         const checkoutBtn = document.querySelector('.btn-checkout');
         if (checkoutBtn) {
