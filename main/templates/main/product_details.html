@@ -25,7 +25,7 @@
                     <div class="product-gallery position-relative mb-4">
                         <div class="text-center position-relative">
                             <img id="main-image" src="{{ product.main_image.url }}" alt="{{ product.name }}" 
-                                class="img-fluid rounded-3 main-product-image" style="max-height: 450px; object-fit: contain;">
+                                 class="img-fluid rounded-3 main-product-image" style="max-height: 450px; object-fit: contain;">
                             
                             <!-- Счетчик изображений -->
                             {% if product.images.all %}
@@ -60,10 +60,10 @@
                                 <div class="thumbnail-item flex-shrink-0">
                                     <div class="thumbnail-wrapper position-relative">
                                         <img src="{{ product.main_image.url }}" alt="{{ product.name }}" 
-                                            class="img-fluid rounded-2 cursor-pointer image-thumbnail active"
-                                            style="height: 80px; width: auto; object-fit: cover;"
-                                            data-image-src="{{ product.main_image.url }}"
-                                            data-image-index="0">
+                                             class="img-fluid rounded-2 cursor-pointer image-thumbnail active"
+                                             style="height: 80px; width: auto; object-fit: cover;"
+                                             data-image-src="{{ product.main_image.url }}"
+                                             data-image-index="0">
                                         <div class="thumbnail-overlay"></div>
                                     </div>
                                 </div>
@@ -72,10 +72,10 @@
                                 <div class="thumbnail-item flex-shrink-0">
                                     <div class="thumbnail-wrapper position-relative">
                                         <img src="{{ image.image.url }}" alt="{{ product.name }} - image {{ forloop.counter }}" 
-                                            class="img-fluid rounded-2 cursor-pointer image-thumbnail"
-                                            style="height: 80px; width: auto; object-fit: cover;"
-                                            data-image-src="{{ image.image.url }}"
-                                            data-image-index="{{ forloop.counter|add:1 }}">
+                                             class="img-fluid rounded-2 cursor-pointer image-thumbnail"
+                                             style="height: 80px; width: auto; object-fit: cover;"
+                                             data-image-src="{{ image.image.url }}"
+                                             data-image-index="{{ forloop.counter|add:1 }}">
                                         <div class="thumbnail-overlay"></div>
                                     </div>
                                 </div>
@@ -129,11 +129,7 @@
                                 <div class="info-card p-3 rounded-3 bg-light">
                                     <div class="d-flex align-items-center">
                                         <div class="info-icon me-3">
-                                            {% if product.available %}
                                             <i class="bi bi-check2-circle text-success fs-4"></i>
-                                            {% else %}
-                                            <i class="bi bi-x-circle text-danger fs-4"></i>
-                                            {% endif %}
                                         </div>
                                         <div>
                                             <div class="fw-bold text-dark">Availability</div>
@@ -175,7 +171,7 @@
                                             <i class="bi bi-dash"></i>
                                         </button>
                                         <input type="number" id="quantity" name="quantity" value="1" min="1" max="100" 
-                                                class="form-control text-center mx-2" style="width: 70px;">
+                                               class="form-control text-center mx-2" style="width: 70px;">
                                         <button type="button" class="btn btn-outline-secondary btn-sm quantity-btn" data-action="increase">
                                             <i class="bi bi-plus"></i>
                                         </button>
@@ -221,7 +217,7 @@
                     <div class="card product-card border-0 shadow-sm h-100">
                         <div class="card-img-wrapper position-relative overflow-hidden rounded-top-3">
                             <img class="card-img-top product-image" src="{{ related_product.main_image.url }}" 
-                                alt="{{ related_product.name }}" style="height: 200px; object-fit: cover;">
+                                 alt="{{ related_product.name }}" style="height: 200px; object-fit: cover;">
                             <div class="position-absolute top-0 end-0 m-2">
                                 <span class="badge category-badge bg-dark bg-opacity-85 px-2 py-1">
                                     {{ related_product.category }}
