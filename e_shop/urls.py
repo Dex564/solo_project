@@ -8,8 +8,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('main.urls', namespace='main')),
     path('cart/', include('cart.urls', namespace='cart')),
-    path('users/', include('users.urls')),
-    path('', RedirectView.as_view(url='/', permanent=False)),
 ]
 
 
