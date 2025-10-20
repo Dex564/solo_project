@@ -90,22 +90,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-
-
-
-
-# для получения в приложении cart ключа хранения корзины в сессии (наверное)
 CART_SESSION_ID = 'cart'
-
-# Настройки аутентификации
-AUTH_USERS_MODEL = 'users.CustomUser' # Используй НАШУ модель пользователя, а не стандартную
-LOGIN_REDIRECT_URL = '/'  # Куда перенаправлять после успешного входа
-LOGOUT_REDIRECT_URL = '/'  # Куда перенаправлять после выхода
-LOGIN_URL = 'users:login'  # URL для входа (используем позже)
-
-
-
 
 
 # Internationalization
