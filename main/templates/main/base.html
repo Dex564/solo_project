@@ -37,14 +37,14 @@
         }
         
         .nav-list {
-            padding: 0.5rem 1rem 2rem; /* Уменьшен верхний отступ */
+            padding: 0.5rem 1rem 2rem;
         }
         
         .category-link {
             color: #fff !important;
             text-decoration: none;
-            padding: 10px 16px; /* Немного уменьшен padding */
-            margin: 6px 0; /* Уменьшен отступ между ссылками */
+            padding: 10px 16px;
+            margin: 6px 0;
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -78,28 +78,28 @@
             left: 100%;
         }
         
-        /* Логотип с ссылкой - уменьшены отступы */
+        /* Логотип с ссылкой */
         .logo-link {
             display: block;
             text-decoration: none;
             color: inherit;
             transition: var(--transition);
-            padding: 0.75rem 1rem; /* Уменьшен padding */
+            padding: 0.75rem 1rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 0.5rem; /* Уменьшен отступ снизу */
+            margin-bottom: 0.5rem;
         }
         
         .logo {
             color: var(--primary-color);
             font-weight: bold;
-            font-size: 1.4rem; /* Немного уменьшен размер */
+            font-size: 1.4rem;
             text-align: center;
             transition: var(--transition);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 8px; /* Уменьшен padding */
+            padding: 8px;
             border-radius: 8px;
         }
         
@@ -110,13 +110,79 @@
         }
         
         .logo i {
-            font-size: 1.6rem; /* Немного уменьшена иконка */
+            font-size: 1.6rem;
             transition: var(--transition);
         }
         
         .logo-link:hover .logo i {
             transform: rotate(10deg) scale(1.1);
             color: #ff6b6b;
+        }
+        
+        /* Блок пользователя */
+        .user-block {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .user-info {
+            color: white;
+            text-align: center;
+        }
+        
+        .user-avatar {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .username {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .user-email {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+        
+        .user-age {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .logout-form {
+            margin-top: 10px;
+        }
+        
+        .logout-btn {
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: translateY(-2px);
+        }
+        
+        .auth-links {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
         
         /* Контент */
@@ -166,6 +232,11 @@
             .logo i {
                 font-size: 1.4rem;
             }
+            
+            .user-block {
+                margin: 5px;
+                padding: 10px;
+            }
         }
     </style>
 </head>
@@ -175,7 +246,6 @@
         <!-- Боковая панель -->
         <aside id="nav" class="nav bg-dark col-md-3 col-lg-2 sidebar">
             
-            
             <ul class="nav-list">
                 <!-- Кликабельный логотип -->
                 <a href="{% url 'main:main_page' %}" class="logo-link">
@@ -184,6 +254,39 @@
                         <span>Devil Shop</span>
                     </div>
                 </a>
+
+                <!-- Блок пользователя -->
+                <div class="user-block">
+                    {% if user.is_authenticated %}
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="bi bi-person-circle"></i>
+                            </div>
+                            <div class="username">{{ user.username }}</div>
+                            <div class="user-email">{{ user.email }}</div>
+                            
+                            <form method="post" action="{% url 'users_auth:logout' %}" class="logout-form">
+                                {% csrf_token %}
+                                <button type="submit" class="logout-btn">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <div class="auth-links">
+                            <a class="category-link" href="{% url 'users_auth:login' %}">
+                                <i class="bi bi-box-arrow-in-right"></i>
+                                <span>Login</span>
+                            </a>
+                            <a class="category-link" href="{% url 'users_auth:signup' %}">
+                                <i class="bi bi-person-plus"></i>
+                                <span>Sign Up</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Основные ссылки навигации -->
                 <li>
                     <a class="category-link" href="{% url 'main:main_page' %}">
                         <i class="bi bi-house-fill"></i> 
@@ -196,14 +299,12 @@
                         <span>Products List</span>
                     </a>
                 </li>
-                <a class="category-link" href="#">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    <span>Login</span>
-                </a>
-                <a class="category-link" href="{% url 'cart:cart_detail' %}">
-                    <i class="bi bi-basket-fill"></i>
-                    <span>Cart</span>
-                </a>
+                <li>
+                    <a class="category-link" href="{% url 'cart:cart_detail' %}">
+                        <i class="bi bi-basket-fill"></i>
+                        <span>Cart</span>
+                    </a>
+                </li>
             </ul>
         </aside>
 

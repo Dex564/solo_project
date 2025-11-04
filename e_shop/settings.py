@@ -27,8 +27,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'main',
     'cart',
+    'users_auth',
 ]
 
 MIDDLEWARE = [
@@ -90,7 +92,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-CART_SESSION_ID = 'cart'
+
+
 
 
 # Internationalization
@@ -118,3 +121,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+AUTH_USER_MODEL = 'users_auth.CustomUser'
+
+
+
+# Настройки сессии
+CART_SESSION_ID = 'cart'
+
+SESSION_COOKIE_AGE = 1209600  # 2 недели в секундах
+SESSION_SAVE_EVERY_REQUEST = True  # Обновлять время сессии при каждом запросе
